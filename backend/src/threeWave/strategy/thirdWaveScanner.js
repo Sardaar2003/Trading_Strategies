@@ -2,7 +2,7 @@
  * ASTA 3rd Wave Setup Evaluator & Multi-Symbol Scanner
  */
 const { calculateEMA, calculateRSI } = require('../indicators/oscillators');
-const { isUngliSetup, isBbcCandle, isVolumeBreakout } = require('../indicators/candlestick');
+const { isUngliSetup, isBbcCandle, findRecentBbcCandle, isVolumeBreakout } = require('../indicators/candlestick');
 const { analyzeBBNC } = require('../indicators/bollinger');
 const { analyzeWaveStructure } = require('../indicators/waveAnalysis');
 const { calculate3rdWaveTargets } = require('../indicators/fibonacci');
@@ -21,7 +21,7 @@ const TIMEFRAME_PRESETS = [
   { id: 'micro_5m_3m', label: 'Micro Scalper (5m / 3m)', tide: '1D', tideInterval: '5minute', wave: '1D', waveInterval: '3minute' }
 ];
 
-// Core Setup Evaluator Engine
+// Core Setup Evaluator Engine — ASTA 3rd Wave Setup Checklist
 const evaluate3rdWaveSetup = (symbol, tideCandles, waveCandles) => {
   if (!tideCandles || tideCandles.length < 20 || !waveCandles || waveCandles.length < 20) {
     return {
@@ -29,16 +29,17 @@ const evaluate3rdWaveSetup = (symbol, tideCandles, waveCandles) => {
       status: 'INSUFFICIENT_DATA',
       signal: 'NEUTRAL',
       confidencePct: 0,
-      bullishScore: '0/9',
-      bearishScore: '0/9',
+      bullishScore: '0/8',
+      bearishScore: '0/8',
       latestPrice: 0,
       bullishCriteria: {},
       bearishCriteria: {},
+      supportingIndicators: { volumeBreakout: false, status: 'FAIL', rule: 'Above average Volume on BO / BD Candle (MUST)' },
       targets: {}
     };
   }
 
-  // 1. TIDE ANALYSIS (Higher Timeframe)
+  // 1. TIDE ANALYSIS (Screen 1 - Higher Timeframe)
   const tideCloses = tideCandles.map(c => Number(c.close));
   const tideEma20 = calculateEMA(tideCloses, 20);
   const tideLatestClose = tideCloses[tideCloses.length - 1];
@@ -51,7 +52,7 @@ const evaluate3rdWaveSetup = (symbol, tideCandles, waveCandles) => {
   const tideRsiSeries = calculateRSI(tideCloses, 14);
   const tideRsi = tideRsiSeries[tideRsiSeries.length - 1] || 50;
 
-  // 2. WAVE ANALYSIS (Lower Timeframe)
+  // 2. WAVE ANALYSIS (Screen 2 - Lower Timeframe)
   const waveCloses = waveCandles.map(c => Number(c.close));
   const waveStruct = analyzeWaveStructure(waveCandles);
   const waveRsiSeries = calculateRSI(waveCloses, 14);
@@ -59,39 +60,62 @@ const evaluate3rdWaveSetup = (symbol, tideCandles, waveCandles) => {
 
   const currWaveBar = waveCandles[waveCandles.length - 1];
   const ungli = isUngliSetup(currWaveBar);
-  const bbc = isBbcCandle(waveCandles);
+  const currIsBbc = isBbcCandle(waveCandles);
+  const recentBbcObj = findRecentBbcCandle(waveCandles, 4);
+  const hasBbc = currIsBbc || Boolean(recentBbcObj);
   const volBo = isVolumeBreakout(waveCandles);
 
-  // 3. BULLISH SCORECARD (9 Factor)
+  // TLBO + BBC Combined Rule (Breakout with or out of Base Building Candle consolidation)
+  const waveTlboBbc = waveStruct.tlboDetected && hasBbc;
+  const waveTlbdBbc = waveStruct.tlbdDetected && hasBbc;
+
+  // Wave - Double Screen Confirmation Rule:
+  // Both Screen 1 (Tide HTF trend) AND Screen 2 (Wave LTF setup trigger) confirm direction
+  const doubleScreenBullish = Boolean(
+    tideUptick &&
+    (tideBbnc.bbncDn || tideBbnc.isSqueeze || tideRsi > 50.0) &&
+    (waveStruct.hasTwoHls || waveStruct.tlboDetected || ungli.bullishUngli)
+  );
+
+  const doubleScreenBearish = Boolean(
+    tideDowntick &&
+    (tideBbnc.bbncUp || tideBbnc.isSqueeze || tideRsi < 50.0) &&
+    (waveStruct.hasTwoLhs || waveStruct.tlbdDetected || ungli.bearishUngli)
+  );
+
+  // STEP 1: ENTRY CRITERIA — 8-Factor ASTA Scorecard
   const bullishCriteria = {
-    'Tide_Uptick': tideUptick,
-    'Tide_BBNC_DN': tideBbnc.bbncDn || tideBbnc.isSqueeze,
-    'Tide_P_gt_50': tideRsi > 50.0,
-    'Wave_Two_HLs': waveStruct.hasTwoHls,
-    'Wave_TLBO': waveStruct.tlboDetected,
-    'Wave_BBC': bbc,
-    'Wave_Ungli': ungli.bullishUngli,
-    'Wave_P_gt_50': waveRsi > 50.0,
-    'Volume_BO': volBo
+    'Tide - Uptick': tideUptick,
+    'Tide - BBNC - DN': tideBbnc.bbncDn || tideBbnc.isSqueeze,
+    'Tide - P > 50 (Nice to have)': tideRsi > 50.0,
+    'Wave - Two HLs': waveStruct.hasTwoHls,
+    'Wave - TLBO + BBC': waveTlboBbc,
+    'Wave - Ungli setup': ungli.bullishUngli,
+    'Wave - P > 50': waveRsi > 50.0,
+    'Wave - Double Screen Confirmation': doubleScreenBullish
   };
 
-  const bullishScore = Object.values(bullishCriteria).filter(Boolean).length;
-  const totalCriteria = 9;
-
-  // 4. BEARISH SCORECARD (9 Factor)
   const bearishCriteria = {
-    'Tide_Downtick': tideDowntick,
-    'Tide_BBNC_UP': tideBbnc.bbncUp || tideBbnc.isSqueeze,
-    'Tide_P_lt_50': tideRsi < 50.0,
-    'Wave_Two_LHs': waveStruct.hasTwoLhs,
-    'Wave_TLBD': waveStruct.tlbdDetected,
-    'Wave_BBC': bbc,
-    'Wave_Ungli': ungli.bearishUngli,
-    'Wave_P_lt_50': waveRsi < 50.0,
-    'Volume_BD': volBo
+    'Tide - Downtick': tideDowntick,
+    'Tide - BBNC - UP': tideBbnc.bbncUp || tideBbnc.isSqueeze,
+    'Tide - P < 50 (Nice to have)': tideRsi < 50.0,
+    'Wave - Two LHs': waveStruct.hasTwoLhs,
+    'Wave - TLBD + BBC': waveTlbdBbc,
+    'Wave - Ungli setup': ungli.bearishUngli,
+    'Wave - Price < 50': waveRsi < 50.0,
+    'Wave - Double Screen Confirmation': doubleScreenBearish
   };
 
+  const totalCriteria = 8;
+  const bullishScore = Object.values(bullishCriteria).filter(Boolean).length;
   const bearishScore = Object.values(bearishCriteria).filter(Boolean).length;
+
+  // STEP 2: SUPPORTING INDICATORS (Volume on BO/BD Candle — MUST)
+  const supportingIndicators = {
+    volumeBreakout: volBo,
+    status: volBo ? 'PASS' : 'FAIL',
+    rule: 'Above average Volume on BO / BD Candle (MUST)'
+  };
 
   let signal = 'NEUTRAL';
   let confidencePct = 0.0;
@@ -103,7 +127,10 @@ const evaluate3rdWaveSetup = (symbol, tideCandles, waveCandles) => {
   const waveLows5 = waveCandles.slice(-5).map(c => Number(c.low));
   const waveHighs5 = waveCandles.slice(-5).map(c => Number(c.high));
 
-  if (bullishScore >= 5 && volBo && (waveStruct.hasTwoHls || ungli.bullishUngli)) {
+  // Identification of BO/BD candle and BBC candle for ASTA Step 3 Stop Loss
+  const bbcCandleRef = recentBbcObj?.candle || (currIsBbc ? currWaveBar : null);
+
+  if (bullishScore >= 5 && volBo && (waveStruct.hasTwoHls || ungli.bullishUngli || waveStruct.tlboDetected)) {
     signal = 'BUY (3rd Wave Bullish)';
     confidencePct = Number(((bullishScore / totalCriteria) * 100).toFixed(1));
     targets = calculate3rdWaveTargets(
@@ -111,9 +138,12 @@ const evaluate3rdWaveSetup = (symbol, tideCandles, waveCandles) => {
       Math.min(...waveLows20),
       Math.max(...waveHighs20),
       Math.min(...waveLows5),
-      true
+      true,
+      1.618,
+      currWaveBar,
+      bbcCandleRef
     );
-  } else if (bearishScore >= 5 && volBo && (waveStruct.hasTwoLhs || ungli.bearishUngli)) {
+  } else if (bearishScore >= 5 && volBo && (waveStruct.hasTwoLhs || ungli.bearishUngli || waveStruct.tlbdDetected)) {
     signal = 'SELL (3rd Wave Bearish)';
     confidencePct = Number(((bearishScore / totalCriteria) * 100).toFixed(1));
     targets = calculate3rdWaveTargets(
@@ -121,7 +151,10 @@ const evaluate3rdWaveSetup = (symbol, tideCandles, waveCandles) => {
       Math.min(...waveLows20),
       Math.max(...waveHighs20),
       Math.max(...waveHighs5),
-      false
+      false,
+      1.618,
+      currWaveBar,
+      bbcCandleRef
     );
   }
 
@@ -134,6 +167,7 @@ const evaluate3rdWaveSetup = (symbol, tideCandles, waveCandles) => {
     latestPrice,
     bullishCriteria,
     bearishCriteria,
+    supportingIndicators,
     targets,
     waveStructure: waveStruct,
     bbnc: tideBbnc

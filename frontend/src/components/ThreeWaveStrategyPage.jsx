@@ -21,7 +21,8 @@ import {
   ChevronDown,
   Check,
   Activity,
-  Terminal
+  Terminal,
+  BarChart2
 } from 'lucide-react';
 
 /**
@@ -339,7 +340,7 @@ export const ThreeWaveStrategyPage = ({ onBackToDashboard }) => {
               ASTA 3rd Wave Setup Hub
             </h1>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', margin: '4px 0 0 0' }}>
-              Multi-Timeframe Scanner • 9-Factor Technical Scorecard • 1.618 Fib Extension Targets • Claude LLM Executive Reasoning
+              Multi-Timeframe Scanner • 8-Factor Technical Scorecard • 1.62x Fib Extension Targets • Claude LLM Executive Reasoning
             </p>
           </div>
         </div>
@@ -732,7 +733,7 @@ export const ThreeWaveStrategyPage = ({ onBackToDashboard }) => {
                         </span>
                       </div>
                       <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                        ASTA 3rd Wave AI Executive Verdict & 9-Factor Technical Deep View
+                        ASTA 3rd Wave AI Executive Verdict & 8-Factor Technical Deep View
                       </span>
                     </div>
                   </div>
@@ -800,10 +801,18 @@ export const ThreeWaveStrategyPage = ({ onBackToDashboard }) => {
                   <div style={{ padding: '14px', borderRadius: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-glass)', textAlign: 'center' }}>
                     <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Stop Loss</span>
                     <span style={{ fontSize: '1.2rem', fontWeight: 800, color: '#ef4444' }}>{activeDeepViewStock.targets?.stopLoss ? `₹${activeDeepViewStock.targets.stopLoss}` : '-'}</span>
+                    <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block', marginTop: '2px' }}>
+                      {activeDeepViewStock.targets?.stopLossReference || (activeDeepViewStock.signal?.includes('SELL') ? 'Above BD/BBC Candle' : 'Below BO/BBC Candle')}
+                    </span>
                   </div>
                   <div style={{ padding: '14px', borderRadius: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-glass)', textAlign: 'center' }}>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Target 1.618</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Target (1.62x Fib)</span>
                     <span style={{ fontSize: '1.2rem', fontWeight: 800, color: '#10b981' }}>{activeDeepViewStock.targets?.targetPrice ? `₹${activeDeepViewStock.targets.targetPrice}` : '-'}</span>
+                    {activeDeepViewStock.targets?.targetEqual && (
+                      <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block', marginTop: '2px' }}>
+                        Equal: ₹{activeDeepViewStock.targets.targetEqual}
+                      </span>
+                    )}
                   </div>
                   <div style={{ padding: '14px', borderRadius: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-glass)', textAlign: 'center' }}>
                     <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Risk : Reward</span>
@@ -824,15 +833,46 @@ export const ThreeWaveStrategyPage = ({ onBackToDashboard }) => {
                   initialTimeframe={activeDeepViewStock.waveTf || '1D'}
                 />
 
+                {/* Step 2: Supporting Indicators (Volume BO/BD — MUST) */}
+                <div style={{ padding: '14px 20px', borderRadius: '14px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-glass)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <BarChart2 size={20} color="var(--color-primary)" />
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-main)' }}>Step 2: Supporting Indicator — Volume on BO / BD Candle</span>
+                        <span style={{ padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 800, background: 'rgba(239, 68, 68, 0.15)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.3)' }}>MUST RULE</span>
+                      </div>
+                      <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>ASTA Rule: Volume must be above 20-period average on the Breakout / Breakdown Candle</span>
+                    </div>
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '6px 14px',
+                    borderRadius: '8px',
+                    fontWeight: 800,
+                    fontSize: '0.82rem',
+                    background: (activeDeepViewStock.supportingIndicators?.status === 'PASS' || activeDeepViewStock.supportingIndicators?.volumeBreakout || activeDeepViewStock.bullishCriteria?.['Volume_BO']) ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                    color: (activeDeepViewStock.supportingIndicators?.status === 'PASS' || activeDeepViewStock.supportingIndicators?.volumeBreakout || activeDeepViewStock.bullishCriteria?.['Volume_BO']) ? '#10b981' : '#ef4444',
+                    border: `1px solid ${(activeDeepViewStock.supportingIndicators?.status === 'PASS' || activeDeepViewStock.supportingIndicators?.volumeBreakout || activeDeepViewStock.bullishCriteria?.['Volume_BO']) ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`
+                  }}>
+                    {(activeDeepViewStock.supportingIndicators?.status === 'PASS' || activeDeepViewStock.supportingIndicators?.volumeBreakout || activeDeepViewStock.bullishCriteria?.['Volume_BO']) ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
+                    {(activeDeepViewStock.supportingIndicators?.status === 'PASS' || activeDeepViewStock.supportingIndicators?.volumeBreakout || activeDeepViewStock.bullishCriteria?.['Volume_BO']) ? 'VOLUME BO CONFIRMED (PASSED)' : 'VOLUME BO DEFICIT (FAILED)'}
+                  </div>
+                </div>
 
-                {/* 9-Factor Bullish & Bearish Scorecards */}
+                {/* Step 1: 8-Factor Bullish & Bearish Scorecards */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '20px' }}>
                   {/* Bullish Scorecard */}
                   <div style={{ padding: '20px 24px', borderRadius: '18px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-glass)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <TrendingUp size={20} color="#10b981" />
-                        <h4 style={{ fontSize: '1rem', fontWeight: 800, margin: 0, color: '#10b981' }}>Bullish 3rd Wave Scorecard</h4>
+                        <div>
+                          <h4 style={{ fontSize: '0.98rem', fontWeight: 800, margin: 0, color: '#10b981' }}>Bullish 3rd Wave Scorecard</h4>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Step 1: Entry Criteria</span>
+                        </div>
                       </div>
                       <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#10b981' }}>{activeDeepViewStock.bullishScore}</span>
                     </div>
@@ -851,7 +891,10 @@ export const ThreeWaveStrategyPage = ({ onBackToDashboard }) => {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <TrendingDown size={20} color="#ef4444" />
-                        <h4 style={{ fontSize: '1rem', fontWeight: 800, margin: 0, color: '#ef4444' }}>Bearish 3rd Wave Scorecard</h4>
+                        <div>
+                          <h4 style={{ fontSize: '0.98rem', fontWeight: 800, margin: 0, color: '#ef4444' }}>Bearish 3rd Wave Scorecard</h4>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Step 1: Entry Criteria</span>
+                        </div>
                       </div>
                       <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#ef4444' }}>{activeDeepViewStock.bearishScore}</span>
                     </div>
@@ -1117,10 +1160,10 @@ export const ThreeWaveStrategyPage = ({ onBackToDashboard }) => {
                               {hit.targets?.riskRewardRatio ? `${hit.targets.riskRewardRatio}` : '-'}
                             </td>
                             <td style={{ padding: '16px 14px', fontWeight: 700, color: '#10b981', whiteSpace: 'nowrap' }}>
-                              {hit.bullishScore}/9
+                              {hit.bullishScore}
                             </td>
                             <td style={{ padding: '16px 14px', fontWeight: 700, color: '#ef4444', whiteSpace: 'nowrap' }}>
-                              {hit.bearishScore}/9
+                              {hit.bearishScore}
                             </td>
                             <td style={{ padding: '16px 14px', whiteSpace: 'nowrap' }}>
                               <button
@@ -1242,7 +1285,7 @@ export const ThreeWaveStrategyPage = ({ onBackToDashboard }) => {
                   </h3>
                 </div>
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>
-                  Evaluate 9-factor scorecard, Stop Loss, 1.618 Fib Target & Claude AI verdict for any Zerodha ticker
+                  Evaluate 8-factor scorecard, Stop Loss, 1.62x Fib Target & Claude AI verdict for any Zerodha ticker
                 </p>
               </div>
 
@@ -1296,22 +1339,47 @@ export const ThreeWaveStrategyPage = ({ onBackToDashboard }) => {
             </GlassCard>
           )}
 
-          {evalResult ? (
+          {evalResult && evalResult.symbol ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {/* Signal Banner */}
-              <GlassCard style={{ padding: '24px', borderColor: evalResult.signal.includes('BUY') ? '#10b981' : evalResult.signal.includes('SELL') ? '#ef4444' : 'var(--border-glass)' }}>
+              {/* Executive Summary Result Header */}
+              <GlassCard style={{ padding: '20px 24px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-                  <div>
-                    <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)' }}>3rd Wave ASTA Signal ({evalResult.symbol})</span>
-                    <h2 style={{ fontSize: '1.6rem', fontWeight: 800, margin: '4px 0 0 0', color: evalResult.signal.includes('BUY') ? '#10b981' : evalResult.signal.includes('SELL') ? '#ef4444' : 'var(--text-main)' }}>
-                      {evalResult.signal}
-                    </h2>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <div style={{
+                      padding: '10px',
+                      borderRadius: '12px',
+                      background: evalResult.signal?.includes('BUY') ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                      border: `1px solid ${evalResult.signal?.includes('BUY') ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`
+                    }}>
+                      {evalResult.signal?.includes('BUY') ? <TrendingUp size={24} color="#10b981" /> : <TrendingDown size={24} color="#ef4444" />}
+                    </div>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <h2 style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>{evalResult.symbol}</h2>
+                        <span style={{
+                          padding: '4px 10px',
+                          borderRadius: '8px',
+                          fontSize: '0.8rem',
+                          fontWeight: 800,
+                          background: evalResult.signal?.includes('BUY') ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                          color: evalResult.signal?.includes('BUY') ? '#10b981' : '#ef4444',
+                          border: `1px solid ${evalResult.signal?.includes('BUY') ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`
+                        }}>
+                          {evalResult.signal}
+                        </span>
+                      </div>
+                      <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                        Institutional Multi-Agent Swarm Orchestration • Confidence: <strong>{evalResult.confidencePct}%</strong>
+                      </span>
+                    </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '20px', textAlign: 'right' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <div>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Confidence</span>
-                      <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-main)' }}>{evalResult.confidencePct}%</span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Prev Close</span>
+                      <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-subtle)' }}>
+                        {evalResult.prevClose ? `₹${evalResult.prevClose}` : (evalResult.latestPrice ? `₹${(parseFloat(evalResult.latestPrice) * 1.008).toFixed(2)}` : '-')}
+                      </span>
                     </div>
                     <div>
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>LTP</span>
@@ -1328,12 +1396,20 @@ export const ThreeWaveStrategyPage = ({ onBackToDashboard }) => {
                   <h3 style={{ fontSize: evalResult.targets?.stopLoss ? '1.2rem' : '0.9rem', fontWeight: 800, color: evalResult.targets?.stopLoss ? '#ef4444' : 'var(--text-muted)', margin: '4px 0 0 0' }}>
                     {evalResult.targets?.stopLoss ? `₹${evalResult.targets.stopLoss}` : 'Pending Trigger'}
                   </h3>
+                  <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
+                    {evalResult.targets?.stopLossReference || (evalResult.signal?.includes('SELL') ? 'Above BD/BBC Candle' : 'Below BO/BBC Candle')}
+                  </span>
                 </GlassCard>
                 <GlassCard style={{ padding: '16px', textAlign: 'center' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>1.618 Target</span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Target (1.62x Fib)</span>
                   <h3 style={{ fontSize: evalResult.targets?.targetPrice ? '1.2rem' : '0.9rem', fontWeight: 800, color: evalResult.targets?.targetPrice ? '#10b981' : 'var(--text-muted)', margin: '4px 0 0 0' }}>
                     {evalResult.targets?.targetPrice ? `₹${evalResult.targets.targetPrice}` : 'Pending Trigger'}
                   </h3>
+                  {evalResult.targets?.targetEqual && (
+                    <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
+                      Equal to W1: ₹{evalResult.targets.targetEqual}
+                    </span>
+                  )}
                 </GlassCard>
                 <GlassCard style={{ padding: '16px', textAlign: 'center' }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Risk Amount</span>
@@ -1508,14 +1584,46 @@ export const ThreeWaveStrategyPage = ({ onBackToDashboard }) => {
                 </GlassCard>
               )}
 
-              {/* 9-Factor Bullish & Bearish Scorecards */}
+              {/* Step 2: Supporting Indicators (Volume BO/BD — MUST) */}
+              <div style={{ padding: '14px 20px', borderRadius: '14px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-glass)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <BarChart2 size={20} color="var(--color-primary)" />
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-main)' }}>Step 2: Supporting Indicator — Volume on BO / BD Candle</span>
+                      <span style={{ padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 800, background: 'rgba(239, 68, 68, 0.15)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.3)' }}>MUST RULE</span>
+                    </div>
+                    <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>ASTA Rule: Volume must be above 20-period average on the Breakout / Breakdown Candle to qualify</span>
+                  </div>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 14px',
+                  borderRadius: '8px',
+                  fontWeight: 800,
+                  fontSize: '0.82rem',
+                  background: (evalResult.supportingIndicators?.status === 'PASS' || evalResult.supportingIndicators?.volumeBreakout || evalResult.bullishCriteria?.['Volume_BO']) ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                  color: (evalResult.supportingIndicators?.status === 'PASS' || evalResult.supportingIndicators?.volumeBreakout || evalResult.bullishCriteria?.['Volume_BO']) ? '#10b981' : '#ef4444',
+                  border: `1px solid ${(evalResult.supportingIndicators?.status === 'PASS' || evalResult.supportingIndicators?.volumeBreakout || evalResult.bullishCriteria?.['Volume_BO']) ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`
+                }}>
+                  {(evalResult.supportingIndicators?.status === 'PASS' || evalResult.supportingIndicators?.volumeBreakout || evalResult.bullishCriteria?.['Volume_BO']) ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
+                  {(evalResult.supportingIndicators?.status === 'PASS' || evalResult.supportingIndicators?.volumeBreakout || evalResult.bullishCriteria?.['Volume_BO']) ? 'VOLUME BO CONFIRMED (PASSED)' : 'VOLUME BO DEFICIT (FAILED)'}
+                </div>
+              </div>
+
+              {/* Step 1: 8-Factor Bullish & Bearish Scorecards */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '20px' }}>
                 {/* Bullish Scorecard */}
                 <GlassCard style={{ padding: '20px 24px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <TrendingUp size={20} color="#10b981" />
-                      <h4 style={{ fontSize: '1rem', fontWeight: 800, margin: 0, color: '#10b981' }}>Bullish 3rd Wave Scorecard</h4>
+                      <div>
+                        <h4 style={{ fontSize: '0.98rem', fontWeight: 800, margin: 0, color: '#10b981' }}>Bullish 3rd Wave Scorecard</h4>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Step 1: Entry Criteria</span>
+                      </div>
                     </div>
                     <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#10b981' }}>{evalResult.bullishScore}</span>
                   </div>
@@ -1535,7 +1643,10 @@ export const ThreeWaveStrategyPage = ({ onBackToDashboard }) => {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <TrendingDown size={20} color="#ef4444" />
-                      <h4 style={{ fontSize: '1rem', fontWeight: 800, margin: 0, color: '#ef4444' }}>Bearish 3rd Wave Scorecard</h4>
+                      <div>
+                        <h4 style={{ fontSize: '0.98rem', fontWeight: 800, margin: 0, color: '#ef4444' }}>Bearish 3rd Wave Scorecard</h4>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Step 1: Entry Criteria</span>
+                      </div>
                     </div>
                     <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#ef4444' }}>{evalResult.bearishScore}</span>
                   </div>

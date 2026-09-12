@@ -32,10 +32,13 @@ const isUngliSetup = (candle, wickRatio = 0.50, bodyPos = 0.35) => {
 };
 
 // Base Building Candle (BBC) Check
-const isBbcCandle = (candles) => {
+const isBbcCandle = (candles, index = null) => {
   if (!candles || candles.length < 20) return false;
+  const targetIdx = index !== null ? index : candles.length - 1;
+  if (targetIdx < 19 || targetIdx >= candles.length) return false;
+
   let trSum = 0;
-  for (let i = candles.length - 20; i < candles.length; i++) {
+  for (let i = targetIdx - 19; i <= targetIdx; i++) {
     const h = Number(candles[i].high);
     const l = Number(candles[i].low);
     const prevC = Number(candles[i - 1]?.close || candles[i].open);
@@ -43,10 +46,31 @@ const isBbcCandle = (candles) => {
     trSum += tr;
   }
   const atr20 = trSum / 20;
-  const currBar = candles[candles.length - 1];
-  const currRange = Number(currBar.high) - Number(currBar.low);
+  const targetBar = candles[targetIdx];
+  const barRange = Number(targetBar.high) - Number(targetBar.low);
 
-  return currRange < (0.85 * atr20);
+  return barRange < (0.85 * atr20);
+};
+
+// Search for the most recent Base Building Candle (BBC) within lookback bars
+const findRecentBbcCandle = (candles, lookback = 4) => {
+  if (!candles || candles.length < 20) return null;
+  const start = Math.max(19, candles.length - lookback);
+  for (let i = candles.length - 1; i >= start; i--) {
+    if (isBbcCandle(candles, i)) {
+      return {
+        candle: candles[i],
+        index: i,
+        barsAgo: (candles.length - 1) - i,
+        high: Number(candles[i].high),
+        low: Number(candles[i].low),
+        close: Number(candles[i].close),
+        open: Number(candles[i].open),
+        date: candles[i].date
+      };
+    }
+  }
+  return null;
 };
 
 // Volume Breakout Check (>= 1.3x Avg Volume)
@@ -60,36 +84,9 @@ const isVolumeBreakout = (candles, avgPeriod = 20, multiplier = 1.3) => {
   return currVol >= (multiplier * avgVol);
 };
 
-// Find the most recent BBC (Base Building Candle) in the last N bars
-// Returns the candle with lowest range relative to ATR — used for Stop Loss reference (ASTA Step 3)
-const findRecentBbcCandle = (candles, lookback = 10) => {
-  if (!candles || candles.length < 21) return null;
-
-  // Calculate ATR(20) for BBC threshold
-  let trSum = 0;
-  for (let i = candles.length - 20; i < candles.length; i++) {
-    const h = Number(candles[i].high);
-    const l = Number(candles[i].low);
-    const prevC = Number(candles[i - 1]?.close || candles[i].open);
-    const tr = Math.max(h - l, Math.abs(h - prevC), Math.abs(l - prevC));
-    trSum += tr;
-  }
-  const atr20 = trSum / 20;
-
-  // Scan backwards for the most recent BBC candle (range < 85% ATR)
-  for (let i = candles.length - 1; i >= Math.max(0, candles.length - lookback); i--) {
-    const bar = candles[i];
-    const range = Number(bar.high) - Number(bar.low);
-    if (range < 0.85 * atr20) {
-      return { index: i, low: Number(bar.low), high: Number(bar.high) };
-    }
-  }
-  return null;
-};
-
 module.exports = {
   isUngliSetup,
   isBbcCandle,
-  isVolumeBreakout,
-  findRecentBbcCandle
+  findRecentBbcCandle,
+  isVolumeBreakout
 };

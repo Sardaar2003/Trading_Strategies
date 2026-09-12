@@ -941,7 +941,7 @@ export const ThreeWaveSetupChart = ({
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-input)', padding: '6px 14px', borderRadius: '10px', border: '1px solid var(--border-glass)' }}>
           <span style={{ color: 'var(--text-subtle)', fontWeight: 600 }}>
-            9-Factor Scorecard: <strong style={{ color: '#10b981' }}>Bull {bullishScore}/9</strong> | <strong style={{ color: '#ef4444' }}>Bear {bearishScore}/9</strong>
+            ASTA Scorecard: <strong style={{ color: '#10b981' }}>Bull {typeof bullishScore === 'string' && bullishScore.includes('/') ? bullishScore : `${bullishScore}/8`}</strong> | <strong style={{ color: '#ef4444' }}>Bear {typeof bearishScore === 'string' && bearishScore.includes('/') ? bearishScore : `${bearishScore}/8`}</strong>
           </span>
         </div>
       </div>

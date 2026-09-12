@@ -123,8 +123,14 @@ body {
   padding: 24px 32px !important;
 }
 
-.full-width-main .glass-card {
+.full-width-main .glass-card:not(.auth-card) {
   max-width: 100% !important;
+}
+
+.auth-card {
+  max-width: 460px !important;
+  width: 100% !important;
+  margin: 0 auto;
 }
 
 /* --------------------------------------------------------------------------

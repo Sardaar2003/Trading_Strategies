@@ -41,7 +41,10 @@ export const AppContent = () => {
         onNavigateThreeWave={() => setCurrentPage('three_wave_strategy')}
       />
 
-      <main className="main-content full-width-main" style={{ alignItems: 'flex-start', paddingTop: '28px', maxWidth: '100%', width: '100%', padding: '24px 36px' }}>
+      <main
+        className={`main-content ${user ? 'full-width-main' : ''}`}
+        style={user ? { alignItems: 'flex-start', paddingTop: '28px', maxWidth: '100%', width: '100%', padding: '24px 36px' } : { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 'calc(80vh - 80px)' }}
+      >
         {user ? (
           currentPage === 'trading_overview' ? (
             <TradingOverviewPage onBackToDashboard={() => setCurrentPage('dashboard')} />
@@ -54,7 +57,7 @@ export const AppContent = () => {
             />
           )
         ) : (
-          <GlassCard>
+          <GlassCard className="auth-card" style={{ maxWidth: '460px', width: '100%', margin: '0 auto', padding: '36px 32px' }}>
             <div style={{ textAlign: 'center', marginBottom: '24px' }}>
               <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.03em' }}>
                 Alpha<span style={{ color: 'var(--color-primary)' }}>Terminal</span> Portal
