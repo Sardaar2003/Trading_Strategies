@@ -825,6 +825,47 @@ export const ThreeWaveStrategyPage = ({ onBackToDashboard }) => {
                 />
 
 
+                {/* 9-Factor Bullish & Bearish Scorecards */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '20px' }}>
+                  {/* Bullish Scorecard */}
+                  <div style={{ padding: '20px 24px', borderRadius: '18px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-glass)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <TrendingUp size={20} color="#10b981" />
+                        <h4 style={{ fontSize: '1rem', fontWeight: 800, margin: 0, color: '#10b981' }}>Bullish 3rd Wave Scorecard</h4>
+                      </div>
+                      <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#10b981' }}>{activeDeepViewStock.bullishScore}</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {Object.entries(activeDeepViewStock.bullishCriteria || {}).map(([key, val]) => (
+                        <div key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.85rem', padding: '8px 12px', borderRadius: '8px', background: 'var(--bg-input)', border: '1px solid var(--border-glass)' }}>
+                          <span style={{ color: 'var(--text-main)' }}>{key.replace(/_/g, ' ')}</span>
+                          {val ? <CheckCircle2 size={18} color="#10b981" /> : <XCircle size={18} color="#ef4444" />}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Bearish Scorecard */}
+                  <div style={{ padding: '20px 24px', borderRadius: '18px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-glass)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <TrendingDown size={20} color="#ef4444" />
+                        <h4 style={{ fontSize: '1rem', fontWeight: 800, margin: 0, color: '#ef4444' }}>Bearish 3rd Wave Scorecard</h4>
+                      </div>
+                      <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#ef4444' }}>{activeDeepViewStock.bearishScore}</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {Object.entries(activeDeepViewStock.bearishCriteria || {}).map(([key, val]) => (
+                        <div key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.85rem', padding: '8px 12px', borderRadius: '8px', background: 'var(--bg-input)', border: '1px solid var(--border-glass)' }}>
+                          <span style={{ color: 'var(--text-main)' }}>{key.replace(/_/g, ' ')}</span>
+                          {val ? <CheckCircle2 size={18} color="#10b981" /> : <XCircle size={18} color="#ef4444" />}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
                 {/* Claude AI Executive Verdict Glowing Hero Box */}
                 {activeDeepViewStock.claudeVerdict && (
                   <div
