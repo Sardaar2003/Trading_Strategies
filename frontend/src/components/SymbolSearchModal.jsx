@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { GlassCard } from './GlassCard';
 import { StockLogo } from './StockLogo';
 import { Search, X, Plus, Check, ChevronDown, Crosshair, Trash2, Filter } from 'lucide-react';
+import { API_BASE } from '../config/api';
 
 export const SymbolSearchModal = ({
   isOpen,
@@ -92,7 +93,7 @@ export const SymbolSearchModal = ({
   const fetchResults = async (q, ex, cat) => {
     try {
       setLoading(true);
-      const url = `http://localhost:5000/api/market/search?query=${encodeURIComponent(q)}&exchange=${encodeURIComponent(ex)}&category=${encodeURIComponent(cat)}&limit=50`;
+      const url = `${API_BASE}/api/market/search?query=${encodeURIComponent(q)}&exchange=${encodeURIComponent(ex)}&category=${encodeURIComponent(cat)}&limit=50`;
       const res = await fetch(url);
       const data = await res.json();
 

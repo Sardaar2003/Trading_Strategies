@@ -24,6 +24,7 @@ import {
   Terminal,
   BarChart2
 } from 'lucide-react';
+import { API_BASE } from '../config/api';
 
 /**
  * Modern Glassmorphic Custom Dropdown Menu Component
@@ -200,7 +201,7 @@ export const ThreeWaveStrategyPage = ({ onBackToDashboard }) => {
 
   const fetchPresets = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/three-wave/presets', { credentials: 'include' });
+      const response = await fetch(`${API_BASE}/api/three-wave/presets`, { credentials: 'include' });
       const data = await response.json();
       if (data?.success) {
         setPresets(data.presets || []);
@@ -214,7 +215,7 @@ export const ThreeWaveStrategyPage = ({ onBackToDashboard }) => {
   // Poll real-time scan progress & terminal logs
   const fetchScanProgress = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/three-wave/scan-progress', { credentials: 'include' });
+      const response = await fetch(`${API_BASE}/api/three-wave/scan-progress`, { credentials: 'include' });
       const data = await response.json();
       if (data?.success) {
         setScanProgress(data.data);
@@ -242,7 +243,7 @@ export const ThreeWaveStrategyPage = ({ onBackToDashboard }) => {
         customWave: isCustomTf ? customWave : null
       };
 
-      const response = await fetch('http://localhost:5000/api/three-wave/scan', {
+      const response = await fetch(`${API_BASE}/api/three-wave/scan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -255,7 +256,7 @@ export const ThreeWaveStrategyPage = ({ onBackToDashboard }) => {
         setScanError(data?.message || 'Scanning failed.');
       }
     } catch (err) {
-      setScanError(err.message === 'Failed to fetch' ? 'Backend trading engine server connection pending. Please verify backend server on port 5000.' : (err.message || 'Error executing scan.'));
+      setScanError(err.message === 'Failed to fetch' ? 'Backend trading engine server connection pending. Please verify backend server URL.' : (err.message || 'Error executing scan.'));
     } finally {
       clearInterval(interval);
       await fetchScanProgress();
@@ -278,7 +279,7 @@ export const ThreeWaveStrategyPage = ({ onBackToDashboard }) => {
         waveTf: isCustomTf ? customWave : '1M'
       };
 
-      const response = await fetch('http://localhost:5000/api/three-wave/evaluate', {
+      const response = await fetch(`${API_BASE}/api/three-wave/evaluate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

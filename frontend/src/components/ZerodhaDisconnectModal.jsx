@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AlertTriangle, Activity, X, ShieldAlert } from 'lucide-react';
+import { API_BASE } from '../config/api';
 
 export const ZerodhaDisconnectModal = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -8,7 +9,7 @@ export const ZerodhaDisconnectModal = () => {
 
   const checkStatus = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/auth/zerodha/status');
+      const res = await fetch(`${API_BASE}/api/auth/zerodha/status`);
       const data = await res.json();
       if (data.success) {
         setZerodhaConnected(data.connected);
@@ -49,7 +50,7 @@ export const ZerodhaDisconnectModal = () => {
 
     let eventSource;
     try {
-      eventSource = new EventSource('http://localhost:5000/api/market/stream');
+      eventSource = new EventSource(`${API_BASE}/api/market/stream`);
       eventSource.onmessage = (e) => {
         try {
           const payload = JSON.parse(e.data);
@@ -79,7 +80,7 @@ export const ZerodhaDisconnectModal = () => {
     const top = window.screen.height / 2 - height / 2;
 
     window.open(
-      'http://localhost:5000/api/auth/zerodha/login',
+      `${API_BASE}/api/auth/zerodha/login`,
       'Zerodha OAuth Login',
       `width=${width},height=${height},top=${top},left=${left},scrollbars=yes,status=no,resizable=yes`
     );

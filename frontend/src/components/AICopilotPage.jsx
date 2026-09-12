@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { GlassCard } from './GlassCard';
 import { StockLogo } from './StockLogo';
 import { MarkdownText } from './MarkdownText';
+import { API_BASE } from '../config/api';
 import {
   ArrowLeft, Bot, Sparkles, Terminal, Activity, ShieldCheck, ChevronDown, ChevronUp,
   Cpu, Zap, Clock, Send, RefreshCw, Trash2, User, Sliders, Layers, Database,
@@ -159,7 +160,7 @@ export const AICopilotPage = ({ onBackToDashboard }) => {
         content: m.content
       }));
 
-      const res = await fetch('http://localhost:5000/api/ai/analyze', {
+      const res = await fetch(`${API_BASE}/api/ai/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { DeveloperConsole } from './DeveloperConsole';
 import { GlassCard } from './GlassCard';
+import { API_BASE } from '../config/api';
 import {
   LayoutDashboard,
   Code,
@@ -32,7 +33,7 @@ export const Dashboard = ({ onOpenTradingOverview, onOpenAICopilot, onOpenThreeW
     const fetchStatus = async () => {
       try {
         const start = performance.now();
-        const res = await fetch('http://localhost:5000/api/market/health');
+        const res = await fetch(`${API_BASE}/api/market/health`);
         const end = performance.now();
         const roundTripPing = Math.max(2, Math.round(end - start));
         setRealLatency(roundTripPing);
@@ -42,7 +43,7 @@ export const Dashboard = ({ onOpenTradingOverview, onOpenAICopilot, onOpenThreeW
           setClaudeBudget(data.claudeBudget);
         }
 
-        const zRes = await fetch('http://localhost:5000/api/auth/zerodha/status');
+        const zRes = await fetch(`${API_BASE}/api/auth/zerodha/status`);
         const zData = await zRes.json();
         if (zData.success && typeof zData.connected === 'boolean') {
           setZerodhaStatus(zData.connected);

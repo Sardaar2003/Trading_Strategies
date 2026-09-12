@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { RefreshCw, ExternalLink, ZoomIn, ZoomOut, Sliders, Activity, Sparkles, BarChart2, ShieldAlert, Maximize2, Move, RotateCcw } from 'lucide-react';
+import { API_BASE } from '../config/api';
 
 /**
  * Institutional ASTA 3rd Wave Full-Page Expert Inspection Chart & Indicator Math Inspector
@@ -52,7 +53,7 @@ export const ThreeWaveSetupChart = ({
     const fetchCandles = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`http://localhost:5000/api/market/time_series?symbol=${encodeURIComponent(symbol)}&interval=${timeframe}&outputsize=150`, {
+        const res = await fetch(`${API_BASE}/api/market/time_series?symbol=${encodeURIComponent(symbol)}&interval=${timeframe}&outputsize=150`, {
           credentials: 'include'
         });
         const data = await res.json();

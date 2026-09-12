@@ -20,6 +20,9 @@ const { errorHandler, notFound } = require('./middleware/errorMiddleware');
 
 const app = express();
 
+// Trust reverse proxy (Essential for Render HTTPS cookie forwarding)
+app.set('trust proxy', 1);
+
 // Connect to MongoDB
 connectDB();
 
@@ -65,7 +68,7 @@ app.use(
     cookie: {
       maxAge: 14 * 24 * 60 * 60 * 1000,
       httpOnly: true, // Prevents XSS cookie theft
-      sameSite: 'lax',
+      sameSite: config.isProduction ? 'none' : 'lax', // 'none' is required for cross-domain cookies between frontend & backend on Render
       secure: config.isProduction // Requires HTTPS in production
     }
   })

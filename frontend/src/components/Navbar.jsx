@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { ThemeToggle } from './ThemeToggle';
 import { SessionSecurityModal } from './SessionSecurityModal';
 import { ShieldCheck, LogOut, Code, User as UserIcon, Clock, Activity, Lock, ChevronDown, Zap } from 'lucide-react';
+import { API_BASE } from '../config/api';
 
 // Professional SVG Flag & Commodity Badge Component
 const MarketIcon = ({ type }) => {
@@ -129,7 +130,7 @@ export const Navbar = ({ onNavigateHome, onNavigateOverview, onNavigateAICopilot
   useEffect(() => {
     const checkZerodhaStatus = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/auth/zerodha/status');
+        const res = await fetch(`${API_BASE}/api/auth/zerodha/status`);
         const data = await res.json();
         if (data.success && typeof data.connected === 'boolean') {
           setZerodhaConnected(data.connected);
@@ -181,7 +182,7 @@ export const Navbar = ({ onNavigateHome, onNavigateOverview, onNavigateAICopilot
     const top = window.screen.height / 2 - height / 2;
 
     window.open(
-      'http://localhost:5000/api/auth/zerodha/login',
+      `${API_BASE}/api/auth/zerodha/login`,
       'Zerodha OAuth Login',
       `width=${width},height=${height},top=${top},left=${left},scrollbars=yes,status=no,resizable=yes`
     );
@@ -195,7 +196,7 @@ export const Navbar = ({ onNavigateHome, onNavigateOverview, onNavigateAICopilot
       const isReqToken = inputToken.trim().length === 32; // Standard Zerodha request token length
       const body = isReqToken ? { request_token: inputToken.trim() } : { access_token: inputToken.trim() };
       
-      const res = await fetch('http://localhost:5000/api/auth/zerodha/token', {
+      const res = await fetch(`${API_BASE}/api/auth/zerodha/token`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
@@ -219,7 +220,7 @@ export const Navbar = ({ onNavigateHome, onNavigateOverview, onNavigateAICopilot
 
   useEffect(() => {
     let eventSource;
-    const streamUrl = 'http://localhost:5000/api/market/stream';
+    const streamUrl = `${API_BASE}/api/market/stream`;
 
     try {
       eventSource = new EventSource(streamUrl);

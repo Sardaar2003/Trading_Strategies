@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { API_BASE } from '../config/api';
 
 const AuthContext = createContext();
 
@@ -11,7 +12,8 @@ export const AuthProvider = ({ children }) => {
   const checkAuth = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/auth/me', {
+      const res = await fetch(`${API_BASE}/api/auth/me`, {
+        credentials: 'include',
         headers: { 'Accept': 'application/json' }
       });
       const data = await res.json();
@@ -38,8 +40,9 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password, requestedRole = 'user') => {
     try {
       setError(null);
-      const res = await fetch('/api/auth/register', {
+      const res = await fetch(`${API_BASE}/api/auth/register`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password, requestedRole })
       });
@@ -59,8 +62,9 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       setError(null);
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
@@ -80,8 +84,9 @@ export const AuthProvider = ({ children }) => {
   const googleLogin = async (googleUserData) => {
     try {
       setError(null);
-      const res = await fetch('/api/auth/google', {
+      const res = await fetch(`${API_BASE}/api/auth/google`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(googleUserData)
       });
@@ -100,7 +105,10 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      await fetch(`${API_BASE}/api/auth/logout`, {
+        method: 'POST',
+        credentials: 'include'
+      });
     } catch (err) {
       console.error('Logout request error:', err);
     } finally {
@@ -112,7 +120,10 @@ export const AuthProvider = ({ children }) => {
   const deleteAccount = async () => {
     try {
       setError(null);
-      const res = await fetch('/api/auth/account', { method: 'DELETE' });
+      const res = await fetch(`${API_BASE}/api/auth/account`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
       const data = await res.json();
       if (!data.success) {
         throw new Error(data.error || 'Failed to delete account');

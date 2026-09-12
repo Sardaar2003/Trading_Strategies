@@ -4,6 +4,7 @@ import { StockLogo } from './StockLogo';
 import { SymbolSearchModal } from './SymbolSearchModal';
 import { AITradingCopilotPanel } from './AITradingCopilotPanel';
 import { TrendingUp, TrendingDown, RefreshCw, Search, X, ChevronDown, Check, Zap, Sparkles } from 'lucide-react';
+import { API_BASE } from '../config/api';
 
 export const MarketChart = ({ selectedSymbol: propSymbol, onSelectSymbol, onOpenSearchPage, isStandalonePage = true }) => {
   const [selectedSymbolState, setSelectedSymbolState] = useState('RELIANCE');
@@ -82,7 +83,7 @@ export const MarketChart = ({ selectedSymbol: propSymbol, onSelectSymbol, onOpen
     const cacheKey = `trading_works_series_${sym}_${range}`;
     try {
       setLoading(true);
-      const seriesRes = await fetch(`/api/market/time_series?symbol=${encodeURIComponent(sym)}&interval=${encodeURIComponent(range)}&outputsize=60`);
+      const seriesRes = await fetch(`${API_BASE}/api/market/time_series?symbol=${encodeURIComponent(sym)}&interval=${encodeURIComponent(range)}&outputsize=60`);
       const seriesData = await seriesRes.json();
 
       if (seriesData.success && seriesData.data?.values) {
@@ -110,7 +111,7 @@ export const MarketChart = ({ selectedSymbol: propSymbol, onSelectSymbol, onOpen
 
     const checkZerodhaStatus = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/auth/zerodha/status');
+        const res = await fetch(`${API_BASE}/api/auth/zerodha/status`);
         const data = await res.json();
         if (data.success && typeof data.connected === 'boolean') {
           setZerodhaConnected(data.connected);
@@ -138,7 +139,7 @@ export const MarketChart = ({ selectedSymbol: propSymbol, onSelectSymbol, onOpen
 
     let eventSource;
     try {
-      eventSource = new EventSource('http://localhost:5000/api/market/stream');
+      eventSource = new EventSource(`${API_BASE}/api/market/stream`);
       eventSource.onmessage = (e) => {
         try {
           const payload = JSON.parse(e.data);

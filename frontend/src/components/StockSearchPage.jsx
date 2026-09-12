@@ -3,6 +3,7 @@ import { GlassCard } from './GlassCard';
 import { StockLogo } from './StockLogo';
 import { SymbolSearchModal } from './SymbolSearchModal';
 import { Search, ArrowLeft, TrendingUp, TrendingDown, Building2, BarChart2, Layers, Filter, CheckCircle2 } from 'lucide-react';
+import { API_BASE } from '../config/api';
 
 export const StockSearchPage = ({ onSelectStock, onBackToOverview, defaultSymbol = 'RELIANCE' }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -33,7 +34,7 @@ export const StockSearchPage = ({ onSelectStock, onBackToOverview, defaultSymbol
   useEffect(() => {
     let eventSource;
     try {
-      eventSource = new EventSource('http://localhost:5000/api/market/stream');
+      eventSource = new EventSource(`${API_BASE}/api/market/stream`);
       eventSource.onmessage = (e) => {
         try {
           const payload = JSON.parse(e.data);

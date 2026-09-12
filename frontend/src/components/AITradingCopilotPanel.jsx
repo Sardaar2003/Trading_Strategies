@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { StockLogo } from './StockLogo';
+import { API_BASE } from '../config/api';
 import {
   X, Sparkles, Terminal, Activity, ShieldCheck, ChevronDown, ChevronUp,
   Cpu, Zap, Clock, DollarSign, Send, RefreshCw, AlertCircle, Trash2, Bot, User
@@ -64,7 +65,7 @@ export const AITradingCopilotPanel = ({ isOpen, onClose, selectedSymbol = 'RELIA
         content: m.content
       }));
 
-      const res = await fetch('http://localhost:5000/api/ai/analyze', {
+      const res = await fetch(`${API_BASE}/api/ai/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
