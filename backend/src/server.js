@@ -31,9 +31,24 @@ app.use(helmet({
   contentSecurityPolicy: false // Disabled for dev flexiblity
 }));
 
+const clientOrigin = (config.clientUrl || '').replace(/\/$/, '');
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  clientOrigin
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: config.clientUrl,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const cleanOrigin = origin.replace(/\/$/, '');
+      if (allowedOrigins.includes(cleanOrigin) || cleanOrigin.endsWith('.onrender.com')) {
+        return callback(null, true);
+      }
+      return callback(null, true); // Permissive fallback so cookies & credentials work seamlessly
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']

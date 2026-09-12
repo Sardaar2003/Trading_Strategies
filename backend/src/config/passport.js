@@ -4,13 +4,15 @@ const config = require('./env');
 const User = require('../models/User');
 const logger = require('./logger');
 
+const backendUrl = (process.env.RENDER_EXTERNAL_URL || process.env.BACKEND_URL || `http://localhost:${config.port}`).replace(/\/$/, '');
+
 if (config.googleClientId && config.googleClientSecret) {
   passport.use(
     new GoogleStrategy(
       {
         clientID: config.googleClientId,
         clientSecret: config.googleClientSecret,
-        callbackURL: `${config.clientUrl}/api/auth/google/callback`
+        callbackURL: `${backendUrl}/api/auth/google/callback`
       },
       async (accessToken, refreshToken, profile, done) => {
         try {

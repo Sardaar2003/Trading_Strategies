@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { LogIn, X, Mail, User as UserIcon } from 'lucide-react';
+import { API_BASE } from '../config/api';
 
 export const GoogleAuthButton = () => {
   const { googleLogin } = useAuth();
@@ -9,51 +10,92 @@ export const GoogleAuthButton = () => {
   const [googleEmail, setGoogleEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [tokenClient, setTokenClient] = useState(null);
+  const [resolvedClientId, setResolvedClientId] = useState(import.meta.env.VITE_GOOGLE_CLIENT_ID || '');
 
-  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
-
+  // Fetch clientId from backend if not provided in build env
   useEffect(() => {
-    if (googleClientId && window.google?.accounts?.oauth2) {
-      try {
-        const client = window.google.accounts.oauth2.initTokenClient({
-          client_id: googleClientId,
-          scope: 'email profile openid',
-          callback: async (tokenResponse) => {
-            if (tokenResponse.access_token) {
-              setLoading(true);
-              try {
-                // Fetch verified profile from Google UserInfo API
-                const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                  headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
-                });
-                const userInfo = await res.json();
+    if (!resolvedClientId) {
+      fetch(`${API_BASE}/api/auth/google/client-id`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.clientId) {
+            setResolvedClientId(data.clientId);
+          }
+        })
+        .catch(err => console.warn('Could not fetch Google Client ID from backend:', err));
+    }
+  }, [resolvedClientId]);
 
-                await googleLogin({
-                  email: userInfo.email,
-                  name: userInfo.name || userInfo.given_name || userInfo.email.split('@')[0],
-                  avatar: userInfo.picture || '',
-                  googleId: userInfo.sub
-                });
-              } catch (err) {
-                console.error('Google profile fetch error:', err);
-                alert(`Google Login error: ${err.message}`);
-              } finally {
-                setLoading(false);
-              }
+  const initGoogleClient = (clientId) => {
+    if (!clientId || !window.google?.accounts?.oauth2) return null;
+    try {
+      const client = window.google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: 'email profile openid',
+        callback: async (tokenResponse) => {
+          if (tokenResponse.error) {
+            console.error('Google OAuth token error:', tokenResponse);
+            alert(`Google Sign-In Error: ${tokenResponse.error_description || tokenResponse.error}\n\nMake sure "${window.location.origin}" is added to Authorized JavaScript Origins in Google Cloud Console.`);
+            return;
+          }
+
+          if (tokenResponse.access_token) {
+            setLoading(true);
+            try {
+              // Fetch verified profile from Google UserInfo API
+              const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+              });
+              const userInfo = await res.json();
+
+              await googleLogin({
+                email: userInfo.email,
+                name: userInfo.name || userInfo.given_name || userInfo.email.split('@')[0],
+                avatar: userInfo.picture || '',
+                googleId: userInfo.sub
+              });
+            } catch (err) {
+              console.error('Google profile fetch error:', err);
+              alert(`Google Login error: ${err.message}`);
+            } finally {
+              setLoading(false);
             }
           }
-        });
+        }
+      });
+      return client;
+    } catch (err) {
+      console.warn('Google OAuth init error:', err);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    if (resolvedClientId) {
+      const client = initGoogleClient(resolvedClientId);
+      if (client) {
         setTokenClient(client);
-      } catch (err) {
-        console.warn('Google OAuth init error:', err);
+      } else {
+        // Retry shortly if the external script is still loading
+        const timer = setTimeout(() => {
+          const retryClient = initGoogleClient(resolvedClientId);
+          if (retryClient) setTokenClient(retryClient);
+        }, 1200);
+        return () => clearTimeout(timer);
       }
     }
-  }, [googleClientId]);
+  }, [resolvedClientId]);
 
   const handleGoogleClick = () => {
-    if (tokenClient) {
+    let client = tokenClient;
+    if (!client && resolvedClientId && window.google?.accounts?.oauth2) {
+      client = initGoogleClient(resolvedClientId);
+      if (client) setTokenClient(client);
+    }
+
+    if (client) {
       // Trigger official Google OAuth 2.0 popup window
-      tokenClient.requestAccessToken({ prompt: 'select_account' });
+      client.requestAccessToken({ prompt: 'select_account' });
     } else {
       // Fallback: Open interactive prompt modal for dev testing without Client ID
       setShowPromptModal(true);

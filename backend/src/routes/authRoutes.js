@@ -32,6 +32,7 @@ router.post('/zerodha/token', zerodhaToken);
 
 // Google Sign-In Endpoint (direct token validation / fallback)
 router.post('/google', googleAuth);
+router.get('/google/client-id', (req, res) => res.json({ success: true, clientId: config.googleClientId || '' }));
 
 
 // Live Passport Google OAuth Routes (if configured)
