@@ -1,0 +1,9 @@
+node_modules/
+.env
+.env.*
+!.env.example
+logs/
+*.log
+zerodhaCache.json
+zerodhaToken.json
+instruments_cache.json

@@ -1,0 +1,13 @@
+{
+  "watch": [
+    "src"
+  ],
+  "ext": "js,mjs,cjs",
+  "ignore": [
+    "*.json",
+    "zerodhaToken.json",
+    "zerodhaCache.json",
+    "node_modules/**",
+    "logs/**"
+  ]
+}

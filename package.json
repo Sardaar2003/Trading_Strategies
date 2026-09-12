@@ -1,0 +1,14 @@
+{
+  "name": "trading-auth-system",
+  "version": "1.0.0",
+  "description": "Full-stack Trading Authentication System with Glassmorphism UI, MongoDB Sessions, Winston Logging & RBAC",
+  "main": "backend/src/server.js",
+  "scripts": {
+    "start:backend": "npm --prefix backend start",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev"
+  },
+  "keywords": ["express", "mongodb", "react", "vite", "glassmorphism", "rbac", "winston"],
+  "author": "",
+  "license": "ISC"
+}
